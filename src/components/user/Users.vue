@@ -76,6 +76,7 @@
               type="warning"
               icon="el-icon-setting"
               size="mini"
+              @click="setRoles(scope.row)"
             ></el-button>
           </el-tooltip>
         </template>
@@ -137,14 +138,19 @@
     </el-dialog>
 
     <!-- 修改用户 对话框 -->
-    <el-dialog
-      :visible.sync="editDialogVisible"
-      title="修改信息"
-      width="30%"
-    >
-      <el-form ref="editFormRef" :model="editInfo" :rules="formRules" label-width="70px">
+    <el-dialog :visible.sync="editDialogVisible" title="修改信息" width="30%">
+      <el-form
+        ref="editFormRef"
+        :model="editInfo"
+        :rules="formRules"
+        label-width="70px"
+      >
         <el-form-item label="用户名">
-          <el-input v-model="editInfo.username" disabled prop="username"></el-input>
+          <el-input
+            v-model="editInfo.username"
+            disabled
+            prop="username"
+          ></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="editInfo.email"></el-input>
@@ -157,6 +163,32 @@
         <span class="dialog-footer">
           <el-button @click="editDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="submitEditData">
+            确定
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <!-- 分配角色对话框 -->
+    <el-dialog :visible.sync="showRole" title="分配角色" width="35%" @closed="closeRoleDilog">
+      <p>当前的用户: {{curtUser.username}}</p>
+      <p>当前的角色: {{curtUser.role_name}}</p>
+      <span>分配新角色:</span>
+      <!-- 选择角色的下拉框 -->
+      <el-select v-model="roleID" placeholder="请选择" style="padding-left: 5px">
+        <el-option
+        v-for="item in roleList"
+        :key="item.id"
+        :label="item.roleName"
+        :value="item.id"
+        :disabled="item.disabled"
+        >
+        </el-option>
+      </el-select>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showRole = false">取消</el-button>
+          <el-button type="primary" @click="submitRoleInfo">
             确定
           </el-button>
         </span>
@@ -256,7 +288,19 @@ export default {
             trigger: 'blur'
           }
         ]
-      }
+      },
+
+      // 是否显示分配角色对话框
+      showRole: false,
+
+      // 当前角色对象
+      curtUser: {},
+
+      // 角色列表
+      roleList: [],
+
+      // 当前选择的角色 ID
+      roleID: ''
     }
   },
 
@@ -327,7 +371,9 @@ export default {
         if (res.meta.status !== 201) return this.$message.error('用户添加失败!')
         this.$message.success('用户添加成功')
 
-        if (this.userList.length === this.queryUserInfo.pagesize) { this.queryUserInfo.pagenum += 1 }
+        if (this.userList.length === this.queryUserInfo.pagesize) {
+          this.queryUserInfo.pagenum += 1
+        }
 
         this.getUserList()
       })
@@ -352,7 +398,9 @@ export default {
         mobile: this.editInfo.mobile
       })
 
-      if (res.meta.status !== 200) return this.$message.error('修改失败, 请重试!')
+      if (res.meta.status !== 200) {
+        return this.$message.error('修改失败, 请重试!')
+      }
       this.$message.success('修改成功!')
 
       this.getUserList()
@@ -361,38 +409,63 @@ export default {
 
     // 删除用户
     delUser(userID) {
-      this.$msgBox.confirm(
-        '您确认要删除该用户吗?',
-        '',
-        {
+      this.$msgBox
+        .confirm('您确认要删除该用户吗?', '', {
           confirmButtonText: '确认',
           cancelButtonText: '取消',
-          type: 'warning'
-        }
-      )
-        .then(async () => {
-          const { data: res } = await this.$axios.delete('users/' + userID)
+          type: 'warning',
+          callback: async (action) => {
+            if (action === 'confirm') {
+              const { data: res } = await this.$axios.delete('users/' + userID)
 
-          if (res.meta.status !== 200) return this.$message.error('删除失败')
+              if (res.meta.status !== 200) return this.$message.error('删除失败')
 
-          // 如果删除的是最有一页的最后一行数据, 则请求上一页的数据
-          if (this.userList.length === 1) {
-            this.queryUserInfo.pagenum -= 1
+              // 如果删除的是最有一页的最后一行数据, 则请求上一页的数据
+              if (this.userList.length === 1) {
+                this.queryUserInfo.pagenum -= 1
+              }
+
+              this.getUserList()
+              this.$message({ type: 'success', message: '删除成功!' })
+            } else {
+              this.$message({ type: 'info', message: '操作取消' })
+            }
           }
-
-          this.getUserList()
-
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
         })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '操作取消'
-          })
-        })
+    },
+
+    // 分配角色
+    async setRoles(userInfo) {
+      this.curtUser = userInfo
+
+      // 获取角色列表
+      const { data: res } = await this.$axios.get('roles')
+      if (res.meta.status !== 200) return this.$message.error(this.meta.msg)
+
+      this.roleList = res.data
+      this.showRole = !this.showRole
+    },
+
+    // 更新修改的角色
+    async submitRoleInfo() {
+      const { data: res } = await this.$axios({
+        url: `users/${this.curtUser.id}/role`,
+        method: 'put',
+        data: {
+          rid: this.roleID
+        }
+      })
+      if (res.meta.status !== 200) return this.$message.error('角色分配失败, 请重试!')
+      this.$message.success('分配角色成功!')
+
+      this.getUserList()
+      this.showRole = false
+    },
+
+    // 对话框关闭 重置 其中的值
+    closeRoleDilog() {
+      this.curtUser = {}
+      this.roleID = ''
     }
   }
 }

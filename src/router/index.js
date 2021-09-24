@@ -14,7 +14,9 @@ const routes = [
     component: () => { return import('@/components/Home.vue') },
     children: [
       { path: '/welcome', component: () => { return import('@/components/Welcome.vue') } },
-      { path: '/users', component: () => { return import('@/components/user/Users.vue') } }
+      { path: '/users', component: () => { return import('@/components/user/Users.vue') } },
+      { path: '/rights', component: () => { return import('@/components/power/Rights.vue') } },
+      { path: '/roles', component: () => { return import('@/components/power/Roles.vue') } }
     ]
   }
 
