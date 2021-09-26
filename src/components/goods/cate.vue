@@ -167,7 +167,7 @@ export default {
 
       // 数据校验
       formRules: {
-        cateName: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
+        catName: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
       },
 
       // 父级分类数据
