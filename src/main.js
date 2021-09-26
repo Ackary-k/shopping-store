@@ -7,6 +7,12 @@ import '@/assets/fonts/iconfont.css'
 // 导入封装好的请求
 import '@/utils/request.js'
 
+// 引入树形表格
+import ZkTable from 'vue-table-with-tree-grid'
+
+// 注册
+Vue.component('tree-table', ZkTable)
+
 Vue.config.productionTip = false
 
 new Vue({

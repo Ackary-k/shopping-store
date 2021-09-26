@@ -2,7 +2,7 @@ import Vue from 'vue'
 import {
   Button, Form, FormItem, Input, Icon, Message, MessageBox, Container, Header, Aside, Main, Menu,
   Submenu, MenuItem, MenuItemGroup, Breadcrumb, BreadcrumbItem, Card, Row, Col, Table, TableColumn,
-  Switch, Tooltip, Pagination, Dialog, Tag, Tree, Select, Option
+  Switch, Tooltip, Pagination, Dialog, Tag, Tree, Select, Option, Cascader
 } from 'element-ui'
 
 Vue.use(Button)
@@ -33,6 +33,7 @@ Vue.use(Tag)
 Vue.use(Tree)
 Vue.use(Select)
 Vue.use(Option)
+Vue.use(Cascader)
 
 // 为Vue 挂载消息提示方法
 Vue.prototype.$message = Message
