@@ -12,10 +12,7 @@
       <!-- 添加分类按钮区域 -->
       <el-row>
         <el-col>
-          <el-button
-            type="primary"
-            @click="addCate"
-            style="margin-bottom: 10px;"
+          <el-button type="primary" @click="addCate" style="margin-bottom: 10px"
             >添加分类</el-button
           >
         </el-col>
@@ -41,9 +38,9 @@
           <i
             class="el-icon-success"
             v-if="scope.row.cat_deleted === false"
-            style="color: lightgreen;"
+            style="color: lightgreen"
           ></i>
-          <i class="el-icon-error" v-else style="color: red;"></i>
+          <i class="el-icon-error" v-else style="color: red"></i>
         </template>
 
         <!-- 排序 -->
@@ -77,7 +74,7 @@
         :total(设置总页数)
         -->
       <el-pagination
-        style="margin-left: 650px;"
+        style="margin-left: 650px"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         layout="total, sizes, prev, pager, next, jumper"
@@ -153,8 +150,18 @@ export default {
       columns: [
         { label: '分类名称', prop: 'cat_name' },
         // template 将当前列设置为模板列
-        { label: '是否有效', prop: '', type: 'template', template: 'isOK' },
-        { label: '排序', prop: '', type: 'template', template: 'order' },
+        {
+          label: '是否有效',
+          prop: '',
+          type: 'template',
+          template: 'isOK'
+        },
+        {
+          label: '排序',
+          prop: '',
+          type: 'template',
+          template: 'order'
+        },
         { label: '操作', prop: '', type: 'template', template: 'opt' }
       ],
       showCateDialog: false,
@@ -167,7 +174,13 @@ export default {
 
       // 数据校验
       formRules: {
-        catName: [{ required: true, message: '请输入分类名称', trigger: 'blur' }]
+        catName: [
+          {
+            required: true,
+            message: '请输入分类名称',
+            trigger: 'blur'
+          }
+        ]
       },
 
       // 父级分类数据
@@ -224,13 +237,10 @@ export default {
 
     // 点击确定时提交数据
     commitData() {
-      this.$refs.addCateFormRef.validate(async valid => {
+      this.$refs.addCateFormRef.validate(async (valid) => {
         if (!valid) return
         // 发送请求完成添加分类
-        const { data: res } = await this.$axios.post(
-          'categories',
-          this.addForm
-        )
+        const { data: res } = await this.$axios.post('categories', this.addForm)
 
         if (res.meta.status !== 201) {
           return this.$message.error('添加分类失败')
@@ -261,7 +271,7 @@ export default {
     parentCateChange() {
       // 如果用户选择了父级分类
       if (this.selectedKeys.length > 0) {
-      // 则将数组中的最后一项设置为父级分类
+        // 则将数组中的最后一项设置为父级分类
         this.addForm.cat_pid = this.selectedKeys[this.selectedKeys.length - 1]
         // level也要跟着发生变化
         this.addForm.cat_level = this.selectedKeys.length
