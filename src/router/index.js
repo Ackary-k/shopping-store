@@ -18,6 +18,7 @@ const routes = [
       { path: '/rights', component: () => { return import('@/components/power/Rights.vue') } },
       { path: '/roles', component: () => { return import('@/components/power/Roles.vue') } },
       { path: '/categories', component: () => { return import('@/components/goods/cate.vue') } },
+      { path: '/params', component: () => { return import('@/components/goods/Params.vue') } },
       { path: '/goods', component: () => { return import('@/components/goods/List.vue') } }
     ]
   }
