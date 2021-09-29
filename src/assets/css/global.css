@@ -21,9 +21,20 @@ html,body,#app{
 
 .el-pagination {
   margin-top: 10px;
-  margin-left: 870px;
 }
 
 .el-cascader-menu {
     height: 250px!important;
+}
+
+.el-steps{
+    margin:15px 0;
+    justify-content: center;
+}
+.el-step__title{
+    font-size: 13px;
+}
+
+.ql-editor {
+    min-height: 300px;
 }

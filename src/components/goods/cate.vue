@@ -227,7 +227,10 @@ export default {
     },
 
     // 对话框关闭时的操作
-    dialogClosed() {},
+    dialogClosed() {
+      this.$refs.addCateFormRef.resetFields()
+      console.log(this.$refs.addCateFormRef)
+    },
 
     // 添加分类事件
     addCate() {

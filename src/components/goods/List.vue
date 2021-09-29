@@ -16,18 +16,18 @@
             placeholder="请输入内容"
             v-model="queryInfo.query"
             clearable
-            @clear="getGoodsList(queryInfo)"
-            @change="getGoodsList(queryInfo)"
+            @clear="getGoodsList()"
+            @change="getGoodsList()"
           >
             <el-button
               slot="append"
               icon="el-icon-search"
-              @click="getGoodsList(queryInfo)"
+              @click="getGoodsList()"
             ></el-button>
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">添加商品</el-button>
+          <el-button type="primary" @click="$router.push('/goods/addgoods')">添加商品</el-button>
         </el-col>
       </el-row>
 
@@ -79,6 +79,7 @@
       >
       </el-pagination>
     </el-card>
+
   </div>
 </template>
 
@@ -99,13 +100,13 @@ export default {
     }
   },
   created() {
-    this.getGoodsList(this.queryInfo)
+    this.getGoodsList()
   },
   methods: {
-    async getGoodsList(queryInfo) {
+    async getGoodsList() {
       //   根据分页获取对应的商品列表
       const { data: res } = await this.$axios.get('goods', {
-        params: queryInfo
+        params: this.queryInfo
       })
 
       if (res.meta.status !== 200) {
@@ -119,13 +120,13 @@ export default {
     handleSizeChange(newSize) {
       // 当页号发生改变时，更改pagesize，重新请.pagesize = newSize
       this.pagesize = newSize
-      this.getGoodsList(this.queryInfo)
+      this.getGoodsList()
     },
 
     handleCurrentChange(newPage) {
       // 当页码发生改变时，更改pagesize，重新请求
       this.queryInfo.pagenum = newPage
-      this.getGoodsList(this.queryInfo)
+      this.getGoodsList()
     }
   }
 }

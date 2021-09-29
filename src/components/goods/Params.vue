@@ -57,13 +57,14 @@
                 </el-tag>
                 <!-- 输入框 -->
                 <el-input
+                  v-el-focus
                   v-if="sc.row.inputVisible"
                   class="input-new-tag tag-self-style"
                   v-model="sc.row.inputValue"
                   ref="saveTagInput"
                   size="small"
                   @keyup.enter.native="handleInputConfirm(sc.row)"
-                  @blur="handleInputConfirm(sc.row)"
+                  @blur="sc.row.inputVisible = false"
                 >
                 </el-input>
                 <!-- 添加按钮 -->
@@ -71,7 +72,7 @@
                   v-else
                   class="button-new-tag"
                   size="small"
-                  @click="showInput(sc.row)"
+                  @click="sc.row.inputVisible = true"
                 >
                   + New Tag
                 </el-button>
@@ -116,8 +117,34 @@
           >
           <!-- 静态属性表格 -->
           <el-table :data="onlyTableData" border stripe>
-            <!-- 展开行 -->
-            <el-table-column type="expand"></el-table-column>
+             <!-- 展开行 -->
+            <el-table-column type="expand">
+              <template slot-scope="sc">
+                <el-tag v-for="(tag, i) in sc.row.attr_vals" :key="i" closable>
+                  {{ tag }}
+                </el-tag>
+                <!-- 输入框 -->
+                <el-input
+                  v-if="inputVisible"
+                  class="input-new-tag tag-self-style"
+                  v-model="sc.row.inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(sc.row)"
+                  @blur="handleInputConfirm(sc.row)"
+                >
+                </el-input>
+                <!-- 添加按钮 -->
+                <el-button
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(sc.row)"
+                >
+                  + New Tag
+                </el-button>
+              </template>
+            </el-table-column>
             <!-- 索引列 -->
             <el-table-column type="index"></el-table-column>
             <el-table-column
@@ -231,7 +258,9 @@ export default {
         attr_name: [{ required: true, message: '请输入名称', trigger: 'blur' }]
       },
       // 编辑参数对话框是否可见
-      editDialogVisible: false
+      editDialogVisible: false,
+      // input 标签是否可见
+      inputVisible: false
     }
   },
   methods: {
@@ -249,6 +278,14 @@ export default {
 
     // 当用户在级联菜单中选择内容改变时触发
     async handleChange() {
+      // 如果用户选择的不是三级分类
+      if (this.selectedCateKeys.length !== 3) {
+        this.selectedCateKeys = []
+        this.manyTableData = []
+        this.onlyTableData = []
+        return
+      }
+
       this.getParams()
     },
 
@@ -282,6 +319,10 @@ export default {
         e.inputVisible = false
         e.inputValue = ''
       })
+
+      // 根据不同 activeName 的值, 保存 res.data
+      if (this.activeName === 'many') this.manyTableData = res.data
+      else this.onlyTableData = res.data
     },
 
     // tab 点击事件
@@ -294,6 +335,7 @@ export default {
     addParams() {
       this.$refs.addFormRef.validate(async (valid) => {
         if (!valid) return
+
         const { data: res } = await this.$axios({
           url: `categories/${this.cateID}/attributes`,
           method: 'POST',
@@ -310,29 +352,34 @@ export default {
         this.$message.success('添加' + this.titleText + '成功!')
 
         this.getParams()
-        this.getCateList()
+        // this.getCateList()
 
         this.addDialogVisible = false
       })
     },
-    // 电视添加参数对话框
+
+    // 显示添加参数对话框
     showDialog() {
       this.addDialogVisible = !this.addDialogVisible
     },
+
     // 显示编辑对话框
     showEditDialog(row) {
       this.addForm.attr_id = row.attr_id
       this.addForm.attr_name = row.attr_name
       this.editDialogVisible = !this.editDialogVisible
     },
+
     // 对话框关闭时, 重置表单
     addDialogClosed() {
       this.$refs.addFormRef.resetFields()
     },
+
     // 编辑对话框关闭事件, 重置表单
     editDialogClosed() {
       this.$refs.editFormRef.resetFields()
     },
+
     // 编辑提交事件
     async editParams() {
       const { data: res } = await this.$axios({
@@ -371,26 +418,38 @@ export default {
       // 判断用户在文本框中输入的内容是否合法
       if (row.inputValue.trim().length === 0) {
         row.inputValue = ''
-        row.inputVisible = false
+        this.inputVisible = false
       }
 
-      row.inputVisible = false
       // 如果用户输入了真实合法的数据，需要保存起来
+      row.attr_vals.push(row.inputValue.trim())
+      row.inputValue = ''
+      this.inputVisible = false
+      console.log(row)
+
+      // 提交到服务器
+      this.saveAttrVals(row)
     },
+
+    // 添加tag input 框显示
     showInput(row) {
       // 用户点击添加按钮时触发
       row.inputVisible = true
 
       // $nextTick:在页面上元素被重新渲染之后，调用回调函数的代码
-      //   this.$nextTick(_ => {
-      //     // 让文本框自动获得焦点
-      //     this.$refs.saveTagInput.$refs.input.focus()
-      //   })
-    }
+      this.$nextTick((_) => {
+        // 让文本框自动获得焦点
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
+    },
+    // 发起请求, 更新数据
+    saveAttrVals(row) {}
   },
+
   created() {
     this.getCateList()
   },
+
   computed: {
     // 计算属性 如果选中的商品分类不等于 3, 则禁用
     isButtonDisabled() {
@@ -419,7 +478,7 @@ export default {
 }
 
 .el-tag {
-  margin: 5px;
+  margin-left: 5px;
 }
 
 .tag-self-style {

@@ -11,7 +11,9 @@
     "core-js": "^3.6.5",
     "element-plus": "^1.1.0-beta.16",
     "element-ui": "^2.4.5",
+    "lodash": "^4.17.21",
     "vue": "^2.6.11",
+    "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.2.0",
     "vue-table-with-tree-grid": "0.2.4"
   },
@@ -32,6 +34,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "less": "^4.1.1",
     "less-loader": "^5.0.0",
+    "moment": "^2.29.1",
     "vue-cli-plugin-element": "^1.0.1",
     "vue-template-compiler": "^2.6.11"
   }
